@@ -69,11 +69,11 @@ GOOGLE_CREDENTIALS_RAW = os.getenv('GOOGLE_CREDENTIALS_JSON', '')
 
 # Scraper Settings
 MAX_PROFILES_PER_RUN = int(os.getenv('MAX_PROFILES_PER_RUN', '0'))
-BATCH_SIZE = int(os.getenv('BATCH_SIZE', '10'))
-MIN_DELAY = float(os.getenv('MIN_DELAY', '0.2'))
-MAX_DELAY = float(os.getenv('MAX_DELAY', '0.4'))
-PAGE_LOAD_TIMEOUT = int(os.getenv('PAGE_LOAD_TIMEOUT', '15'))
-SHEET_WRITE_DELAY = float(os.getenv('SHEET_WRITE_DELAY', '0.4'))
+BATCH_SIZE = int(os.getenv('BATCH_SIZE', '20'))
+MIN_DELAY = float(os.getenv('MIN_DELAY', '0.4'))
+MAX_DELAY = float(os.getenv('MAX_DELAY', '0.6'))
+PAGE_LOAD_TIMEOUT = int(os.getenv('PAGE_LOAD_TIMEOUT', '30'))
+SHEET_WRITE_DELAY = float(os.getenv('SHEET_WRITE_DELAY', '0.8'))
 
 # Sheet Structure
 COLUMN_ORDER = [
