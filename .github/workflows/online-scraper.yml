@@ -1,7 +1,7 @@
 name: "Online Profile Scraper"
 
 on:
-  # Scheduled run every 15 minutes
+  # Scheduled run every 16 minutes
   schedule:
     - cron: '*/15 * * * *'  # Every 15 minutes
   
@@ -17,6 +17,10 @@ on:
         description: 'Batch Size'
         required: false
         default: '10'
+
+concurrency:
+  group: online-scraper-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   scrape-online:
