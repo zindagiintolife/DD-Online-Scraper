@@ -139,24 +139,50 @@ def convert_relative_date_to_absolute(relative_text):
     now = get_pkt_time()
     
     try:
-        match = re.search(r'(\d+)\s*(second|minute|hour|day|week|month|year)s?\s*ago', relative_text)
-        if match:
+        # Normalize common abbreviations
+        abbrev_map = {
+            r"\bsecs?\b": "seconds",
+            r"\bmins?\b": "minutes",
+            r"\bhrs?\b": "hours",
+            r"\bwks?\b": "weeks",
+            r"\byrs?\b": "years",
+            r"\bmon(s)?\b": "months",
+        }
+        for pat, repl in abbrev_map.items():
+            relative_text = re.sub(pat, repl, relative_text)
+
+        # Handle special phrases
+        if relative_text in {"just now", "now"}:
+            return now.strftime("%d-%b-%y")
+        if relative_text == "yesterday":
+            return (now - timedelta(days=1)).strftime("%d-%b-%y")
+
+        # Support 'a/an <unit> ago'
+        aa = re.search(r"\b(a|an)\s+(second|minute|hour|day|week|month|year)s?\s*ago\b", relative_text)
+        if aa:
+            amount = 1
+            unit = aa.group(2)
+        else:
+            # Standard '<num> <unit> ago'
+            match = re.search(r"(\d+)\s*(second|minute|hour|day|week|month|year)s?\s*ago", relative_text)
+            if not match:
+                return relative_text
             amount = int(match.group(1))
             unit = match.group(2)
-            
-            delta_map = {
-                'second': timedelta(seconds=amount),
-                'minute': timedelta(minutes=amount),
-                'hour': timedelta(hours=amount),
-                'day': timedelta(days=amount),
-                'week': timedelta(weeks=amount),
-                'month': timedelta(days=amount * 30),
-                'year': timedelta(days=amount * 365)
-            }
-            
-            if unit in delta_map:
-                target_date = now - delta_map[unit]
-                return target_date.strftime("%d-%b-%y")
+
+        delta_map = {
+            'second': timedelta(seconds=amount),
+            'minute': timedelta(minutes=amount),
+            'hour': timedelta(hours=amount),
+            'day': timedelta(days=amount),
+            'week': timedelta(weeks=amount),
+            'month': timedelta(days=amount * 30),
+            'year': timedelta(days=amount * 365)
+        }
+        
+        if unit in delta_map:
+            target_date = now - delta_map[unit]
+            return target_date.strftime("%d-%b-%y")
         return relative_text
     except:
         return relative_text
