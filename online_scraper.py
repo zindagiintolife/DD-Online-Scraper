@@ -110,7 +110,7 @@ def clean_data(value):
     return "" if value in remove else value
 
 def convert_date(relative_text):
-    """Convert '2 months ago' to 'dd-mmm-yy'"""
+    """Convert '2 months ago' to 'dd-mmm-yy' - ALWAYS return current date for recent times"""
     if not relative_text:
         return ""
     
@@ -124,7 +124,7 @@ def convert_date(relative_text):
         for pat, repl in abbrev.items():
             text = re.sub(pat, repl, text)
         
-        # Special cases
+        # Special cases - return current date
         if text in {"just now", "now"}:
             return now.strftime("%d-%b-%y")
         if text == "yesterday":
@@ -137,18 +137,31 @@ def convert_date(relative_text):
         else:
             match = re.search(r"(\d+)\s*(second|minute|hour|day|week|month|year)s?\s*ago", text)
             if not match:
+                # If no match, check if it contains "ago" - return current date
+                if "ago" in text or "min" in text or "sec" in text or "hour" in text:
+                    return now.strftime("%d-%b-%y")
                 return relative_text
             amount, unit = int(match.group(1)), match.group(2)
         
-        deltas = {'second': timedelta(seconds=amount), 'minute': timedelta(minutes=amount),
-                  'hour': timedelta(hours=amount), 'day': timedelta(days=amount),
-                  'week': timedelta(weeks=amount), 'month': timedelta(days=amount*30),
-                  'year': timedelta(days=amount*365)}
+        # For seconds, minutes, hours - return current date
+        if unit in ['second', 'minute', 'hour']:
+            return now.strftime("%d-%b-%y")
+        
+        deltas = {'day': timedelta(days=amount), 'week': timedelta(weeks=amount),
+                  'month': timedelta(days=amount*30), 'year': timedelta(days=amount*365)}
         
         if unit in deltas:
             return (now - deltas[unit]).strftime("%d-%b-%y")
+        
+        # Default to current date for any unmatched "ago" text
+        if "ago" in text:
+            return now.strftime("%d-%b-%y")
+        
         return relative_text
     except:
+        # On error, if contains "ago", return current date
+        if "ago" in str(relative_text).lower():
+            return get_pkt_time().strftime("%d-%b-%y")
         return relative_text
 
 def to_url(href):
